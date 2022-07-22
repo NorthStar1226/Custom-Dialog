@@ -6,13 +6,14 @@ import android.os.Bundle;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
 import com.zhangjq.luckydraw.R;
 
-public class EditDialog extends Dialog {
+public class AddCookiesDialog extends Dialog {
     private Button yes, no;//确定按钮
     private TextView titleTv;//消息标题文本
     private EditText mCookieNameEt;//输入电话
@@ -23,6 +24,8 @@ public class EditDialog extends Dialog {
 
     private onNoOnclickListener noOnclickListener;//取消按钮被点击了的监听器
     private onYesOnclickListener yesOnclickListener;//确定按钮被点击了的监听器
+
+    private InputMethodManager inputMethodManager;
 
     /**
      * 设置取消按钮的显示内容和监听
@@ -50,14 +53,14 @@ public class EditDialog extends Dialog {
         this.yesOnclickListener = onYesOnclickListener;
     }
 
-    public EditDialog(Context context) {
+    public AddCookiesDialog(Context context) {
         super(context, R.style.Dialog_Msg);
     }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.dialog);
+        setContentView(R.layout.dialog_add_cookies);
         //按空白处不能取消动画
         setCanceledOnTouchOutside(false);
 
@@ -78,6 +81,7 @@ public class EditDialog extends Dialog {
         yes.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+
                 if (yesOnclickListener != null) {
                     yesOnclickListener.onYesClick(mCookieNameEt.getText().toString());
                 }
@@ -143,11 +147,11 @@ public class EditDialog extends Dialog {
      * 设置确定按钮和取消被点击的接口
      */
     public interface onYesOnclickListener {
-        public void onYesClick(String phone);
+        void onYesClick(String phone);
     }
 
     public interface onNoOnclickListener {
-        public void onNoClick();
+        void onNoClick();
     }
 
     @Override
@@ -157,9 +161,18 @@ public class EditDialog extends Dialog {
          * 设置宽度全屏，要设置在show的后面
          */
         WindowManager.LayoutParams layoutParams = getWindow().getAttributes();
-        layoutParams.width= ViewGroup.LayoutParams.MATCH_PARENT;
-        layoutParams.height= ViewGroup.LayoutParams.MATCH_PARENT;
+        layoutParams.width = ViewGroup.LayoutParams.MATCH_PARENT;
+        layoutParams.height = ViewGroup.LayoutParams.MATCH_PARENT;
         getWindow().getDecorView().setPadding(0, 0, 0, 0);
         getWindow().setAttributes(layoutParams);
+        inputMethodManager = (InputMethodManager) getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+        inputMethodManager.showSoftInput(mCookieNameEt, InputMethodManager.SHOW_FORCED);
+    }
+
+    @Override
+    public void dismiss() {
+        super.dismiss();
+        inputMethodManager = (InputMethodManager) getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+        inputMethodManager.hideSoftInputFromWindow(mCookieNameEt.getApplicationWindowToken(), 0);
     }
 }

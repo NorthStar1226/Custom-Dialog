@@ -1,6 +1,7 @@
 package com.zhangjq.luckydraw.adapter;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -9,7 +10,9 @@ import android.widget.CompoundButton;
 
 import com.zhangjq.luckydraw.R;
 
+import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.Map;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -25,7 +28,10 @@ import androidx.recyclerview.widget.RecyclerView;
 
 public class CookiesRecyclerViewAdapter extends RecyclerView.Adapter<CookiesRecyclerViewAdapter.MyViewHolder> {
 
+    private final static String TAG = "CookiesRecyclerViewAdapter";
+
     private LinkedList<String> cookLists;
+    private Map<Integer,Boolean> isCheckedMap = new HashMap<>();
     private Context mContext;
     private OnItemCheckedChangeListener mOnItemCheckedChangeListener;
 
@@ -34,12 +40,12 @@ public class CookiesRecyclerViewAdapter extends RecyclerView.Adapter<CookiesRecy
         cookLists = list;
     }
 
-    public void setOnItemCheckedChangeListener(OnItemCheckedChangeListener litener) {
-
+    public void setOnItemCheckedChangeListener(OnItemCheckedChangeListener listener) {
+        mOnItemCheckedChangeListener = listener;
     }
 
     public interface OnItemCheckedChangeListener {
-        void onItemCheckedChange(View view, boolean isChecked);
+        void onItemCheckedChange(View view, int position, String value, boolean isChecked);
     }
 
     @NonNull
@@ -51,11 +57,14 @@ public class CookiesRecyclerViewAdapter extends RecyclerView.Adapter<CookiesRecy
 
     @Override
     public void onBindViewHolder(@NonNull MyViewHolder holder, int position) {
+        holder.check_name.setText(cookLists.get(position));
+        holder.check_name.setChecked(isCheckedMap.getOrDefault(position,false));
         if (mOnItemCheckedChangeListener != null) {
             holder.check_name.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
                 @Override
                 public void onCheckedChanged(CompoundButton view, boolean isChecked) {
-                    mOnItemCheckedChangeListener.onItemCheckedChange(view, isChecked);
+                    isCheckedMap.put(position,isChecked);
+                    mOnItemCheckedChangeListener.onItemCheckedChange(view, position, cookLists.get(position), isChecked);
                 }
             });
         }
@@ -64,7 +73,7 @@ public class CookiesRecyclerViewAdapter extends RecyclerView.Adapter<CookiesRecy
 
     @Override
     public int getItemCount() {
-        return cookLists==null ? 0 : cookLists.size();
+        return cookLists == null ? 0 : cookLists.size();
     }
 
     static class MyViewHolder extends RecyclerView.ViewHolder {
