@@ -2,6 +2,7 @@ package com.zhangjq.luckydraw.view;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -18,45 +19,26 @@ import java.util.Random;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import static com.zhangjq.luckydraw.MyApplication.getCookiesLists;
+
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
     private RandomLayout mContainer;
-/*    private Button mStartBtn;
-    private TextView mTitle;*/
+    /*    private Button mStartBtn;
+        private TextView mTitle;*/
+    private Random random;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        random = new Random();
         initView();
     }
 
     private void initView() {
         mContainer = (RandomLayout) findViewById(R.id.container);
         Random random = new Random();
-/*        final TextView textView1 = new TextView(this);
-        textView1.setText("111");
-        Log.d("MainActivity", "生成随机数：" + (random.nextFloat() * 10 + 10));
-        textView1.setTextSize((random.nextFloat() * 20 + 10));
-
-        TextView textView2 = new TextView(this);
-        textView2.setText("222");
-        textView2.setTextSize((random.nextFloat() * 20 + 10));
-
-        TextView textView3 = new TextView(this);
-        textView3.setText("333");
-        textView3.setTextSize((random.nextFloat() * 20 + 10));*/
-        for (int i = 0; i <= 7; i++) {
-            TextView textView = new TextView(this);
-            textView.setText(i+""+i+""+i);
-            textView.setTextSize((random.nextFloat() * 20 + 10));
-            mContainer.addViewAtRandomXY(textView, "这个是textView"+i);
-        }
-
-/*        mContainer.addViewAtRandomXY(textView1, "这个是textView1");
-        mContainer.addViewAtRandomXY(textView2, "这个是textView2");
-        mContainer.addViewAtRandomXY(textView3, "这个是textView3");*/
-
         mContainer.setOnRandomItemClickListener(new RandomLayout.OnRandomItemClickListener() {
             @Override
             public void onRandomItemClick(View view, Object o) {
@@ -64,8 +46,29 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 mContainer.removeRandomViewFromList(view);
             }
         });
+        for (int i = 0; i <= 7; i++) {
+            TextView textView = new TextView(this);
+            textView.setText(randomLoadData());
+            textView.setTextSize((random.nextFloat() * 20 + 10));
+            if (TextUtils.isEmpty(textView.getText().toString())){
+                TextView title = findViewById(R.id.title);
+                return;
+            }
+            mContainer.addViewAtRandomXY(textView, "这个是textView" + i);
+        }
 /*        mStartBtn = (Button) findViewById(R.id.btn_start);
         mTitle = (TextView) findViewById(R.id.title);*/
+    }
+
+    private String randomLoadData() {
+        int indexMin = 0;
+        int indexMax = getCookiesLists().size() - 1;
+        if (indexMax>indexMin){
+            int indexRandom = random.nextInt(indexMax) % (indexMax - indexMin + 1) + indexMin;
+            return getCookiesLists().get(indexRandom).getCookiesName();
+        }else {
+            return "";
+        }
     }
 
     @Override
