@@ -21,21 +21,20 @@ import androidx.appcompat.app.AppCompatActivity;
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
     private RandomLayout mContainer;
-    private Button mStartBtn;
-    private TextView mTitle;
+/*    private Button mStartBtn;
+    private TextView mTitle;*/
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         initView();
-
     }
 
     private void initView() {
         mContainer = (RandomLayout) findViewById(R.id.container);
         Random random = new Random();
-        final TextView textView1 = new TextView(this);
+/*        final TextView textView1 = new TextView(this);
         textView1.setText("111");
         Log.d("MainActivity", "生成随机数：" + (random.nextFloat() * 10 + 10));
         textView1.setTextSize((random.nextFloat() * 20 + 10));
@@ -46,11 +45,17 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         TextView textView3 = new TextView(this);
         textView3.setText("333");
-        textView3.setTextSize((random.nextFloat() * 20 + 10));
+        textView3.setTextSize((random.nextFloat() * 20 + 10));*/
+        for (int i = 0; i <= 7; i++) {
+            TextView textView = new TextView(this);
+            textView.setText(i+""+i+""+i);
+            textView.setTextSize((random.nextFloat() * 20 + 10));
+            mContainer.addViewAtRandomXY(textView, "这个是textView"+i);
+        }
 
-        mContainer.addViewAtRandomXY(textView1, "这个是textView1");
+/*        mContainer.addViewAtRandomXY(textView1, "这个是textView1");
         mContainer.addViewAtRandomXY(textView2, "这个是textView2");
-        mContainer.addViewAtRandomXY(textView3, "这个是textView3");
+        mContainer.addViewAtRandomXY(textView3, "这个是textView3");*/
 
         mContainer.setOnRandomItemClickListener(new RandomLayout.OnRandomItemClickListener() {
             @Override
@@ -59,9 +64,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 mContainer.removeRandomViewFromList(view);
             }
         });
-        mStartBtn = (Button) findViewById(R.id.btn_start);
-        mStartBtn.setOnClickListener(this);
-        mTitle = (TextView) findViewById(R.id.title);
+/*        mStartBtn = (Button) findViewById(R.id.btn_start);
+        mTitle = (TextView) findViewById(R.id.title);*/
     }
 
     @Override
@@ -98,12 +102,20 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         });
     }
 
+    private boolean ifStart = false;
 
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.btn_start:
-                // TODO 22/07/21
+                Toast.makeText(MainActivity.this, "调用MainActivity点击监听", Toast.LENGTH_SHORT).show();
+                /*if (ifStart) {
+                    mStartBtn.setText("停止");
+                    ifStart = false;
+                } else {
+                    mStartBtn.setText("开始");
+                    ifStart = true;
+                }*/
                 break;
             default:
                 break;

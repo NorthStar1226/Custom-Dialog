@@ -3,15 +3,21 @@ package com.zhangjq.luckydraw.view;
 import android.content.Context;
 import android.graphics.Rect;
 import android.util.AttributeSet;
+import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
-import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.zhangjq.luckydraw.R;
+
 import java.util.ArrayList;
 import java.util.Random;
+
+import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.constraintlayout.widget.Constraints;
 
 /**
  * 创建日期：2022/7/21 10:25
@@ -29,6 +35,9 @@ import java.util.Random;
  * 2、防止覆盖
  */
 public class RandomLayout<T> extends RelativeLayout {
+
+    private static final String TAG = "RandomLayout";
+
     /**
      * 此列表用于保存随机的View视图
      * 在添加随机View的时候应当判断此视图是否有覆盖的
@@ -39,6 +48,10 @@ public class RandomLayout<T> extends RelativeLayout {
     private OnRandomItemLongClickListener<T> onRandomItemLongClickListener;
     private boolean itemClickable = true;
     private boolean itemLongClickable = true;
+    private ConstraintLayout container;
+    private TextView tv_tips;
+    private Button btn_start;
+    private boolean ifStart = false;
 
     public RandomLayout(Context context) {
         super(context);
@@ -46,32 +59,32 @@ public class RandomLayout<T> extends RelativeLayout {
 
     public RandomLayout(Context context, AttributeSet attrs) {
         super(context, attrs);
-        CreateStartView(context);
+        createStartView(context);
     }
 
-    private void CreateStartView(Context context){
-        LinearLayout container = new LinearLayout(context);
-/*        final Context mContext = context;
-        LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT,LinearLayout.LayoutParams.WRAP_CONTENT);
+    private void createStartView(Context context) {
+        container = (ConstraintLayout) LayoutInflater.from(context).inflate(R.layout.activity_main1, null, false);
+        final Context mContext = context;
+        RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
+        layoutParams.addRule(CENTER_IN_PARENT);
         container.setLayoutParams(layoutParams);
-        container.setOrientation(LinearLayout.VERTICAL);
-        TextView title = new TextView(context);
-        title.setText("抽奖吗？");
-        title.setTextSize(18);
-        container.addView(title);
-        Button startButton = new Button(context);
-        startButton.setText("开始");
-        final boolean ifStart=false;
-        startButton.setOnClickListener(new OnClickListener() {
+        tv_tips = container.findViewById(R.id.title);
+        btn_start = container.findViewById(R.id.btn_start);
+        btn_start.setText("开始");
+        btn_start.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                Button me = findViewById(v.getId());
-                Toast.makeText(mContext.getApplicationContext(), "点击了开始按钮", Toast.LENGTH_SHORT).show();
-
+                Toast.makeText(mContext.getApplicationContext(), "调用布局的点击监听", Toast.LENGTH_SHORT).show();
+                if (ifStart) {
+                    btn_start.setText("停止");
+                    ifStart = false;
+                } else {
+                    btn_start.setText("开始");
+                    ifStart = true;
+                }
             }
         });
-        container.addView(startButton);
-        addView(container);*/
+        addView(container);
     }
 
     /**
@@ -88,10 +101,10 @@ public class RandomLayout<T> extends RelativeLayout {
                 randomViewList.remove(view);
                 // 100次随机上限
                 for (int i = 0; i < 100; i++) {
-                    int[] xy = createXY(
-                            view.getMeasuredHeight(),
-                            view.getMeasuredWidth()
-                    );
+                    int[] xy = createXY(view.getMeasuredHeight(), view.getMeasuredWidth());
+                    if (isCoverButton(view, xy[0], xy[1], t)) {
+                        return;
+                    }
                     if (randomViewList.size() == 0) {
                         addViewAndSetXY(view, xy[0], xy[1], t);
                     } else {
@@ -105,8 +118,7 @@ public class RandomLayout<T> extends RelativeLayout {
                             int height = subView.getMeasuredHeight();
                             // 创建矩形
                             Rect v1Rect = new Rect(x, y, width + x, height + y);
-                            Rect v2Rect = new Rect(
-                                    xy[0], xy[1],
+                            Rect v2Rect = new Rect(xy[0], xy[1],
                                     view.getMeasuredWidth() + xy[0],
                                     view.getMeasuredHeight() + xy[1]
                             );
@@ -123,6 +135,25 @@ public class RandomLayout<T> extends RelativeLayout {
                 }
             }
         });
+    }
+
+    private boolean isCoverButton(final View view, int x, int y, final T t) {
+        int centerContainerX = (int)container.getX();
+        int centerContainerY = (int)container.getY();
+        int centerContainerWidth = view.getMeasuredWidth();
+        int centerContainerHeight = view.getMeasuredHeight();
+        Rect centerContainerRect = new Rect(centerContainerX, centerContainerY, centerContainerWidth + x, centerContainerHeight + y);
+        Rect newRect = new Rect(x, y, view.getMeasuredWidth() + x, view.getMeasuredHeight() + y);
+        if (Rect.intersects(centerContainerRect, newRect)) {
+            if(view instanceof TextView){
+                TextView textView = (TextView)view;
+                Log.d(TAG, "过滤重复视图 "+textView.getText().toString());
+            }else{
+                Log.d(TAG, "过滤重复视图,该视图不是TextView");
+            }
+            return true;
+        }
+        return false;
     }
 
     private void addViewAndSetXY(View view, int x, int y, final T t) {

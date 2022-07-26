@@ -60,7 +60,7 @@ public class AddCookiesDialog extends Dialog {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.dialog_add_cookies);
+        setContentView(R.layout.dialog);
         //按空白处不能取消动画
         setCanceledOnTouchOutside(false);
 
@@ -123,6 +123,7 @@ public class AddCookiesDialog extends Dialog {
         no = (Button) findViewById(R.id.no);
         titleTv = (TextView) findViewById(R.id.title);
         mCookieNameEt = (EditText) findViewById(R.id.et_cookie_name);
+        getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN);
     }
 
     /**

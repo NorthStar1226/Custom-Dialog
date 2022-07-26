@@ -9,6 +9,7 @@ import android.widget.CheckBox;
 import android.widget.CompoundButton;
 
 import com.zhangjq.luckydraw.R;
+import com.zhangjq.luckydraw.bean.CookiesInfo;
 
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -30,12 +31,12 @@ public class CookiesRecyclerViewAdapter extends RecyclerView.Adapter<CookiesRecy
 
     private final static String TAG = "CookiesRecyclerViewAdapter";
 
-    private LinkedList<String> cookLists;
-    private Map<Integer,Boolean> isCheckedMap = new HashMap<>();
+    private LinkedList<CookiesInfo> cookLists;
+    private LinkedList<String> deletedLists = new LinkedList<>();
     private Context mContext;
     private OnItemCheckedChangeListener mOnItemCheckedChangeListener;
 
-    public CookiesRecyclerViewAdapter(Context context, LinkedList<String> list) {
+    public CookiesRecyclerViewAdapter(Context context, LinkedList<CookiesInfo> list) {
         mContext = context;
         cookLists = list;
     }
@@ -45,7 +46,7 @@ public class CookiesRecyclerViewAdapter extends RecyclerView.Adapter<CookiesRecy
     }
 
     public interface OnItemCheckedChangeListener {
-        void onItemCheckedChange(View view, int position, String value, boolean isChecked);
+        void onItemCheckedChange(View view, int position, CookiesInfo cookiesInfo, boolean isChecked);
     }
 
     @NonNull
@@ -57,18 +58,32 @@ public class CookiesRecyclerViewAdapter extends RecyclerView.Adapter<CookiesRecy
 
     @Override
     public void onBindViewHolder(@NonNull MyViewHolder holder, int position) {
-        holder.check_name.setText(cookLists.get(position));
-        holder.check_name.setChecked(isCheckedMap.getOrDefault(position,false));
+        holder.check_name.setText(cookLists.get(position).getCookiesName());
+        if (cookLists.get(position).isSeclected()) {
+            holder.check_name.setChecked(true);
+        }else {
+            holder.check_name.setChecked(false);
+        }
         if (mOnItemCheckedChangeListener != null) {
             holder.check_name.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
                 @Override
                 public void onCheckedChanged(CompoundButton view, boolean isChecked) {
-                    isCheckedMap.put(position,isChecked);
+                    if (isChecked){
+                        Log.d(TAG,"isChecked = true");
+                    }else{
+                        Log.d(TAG,"isChecked = false");
+                    }
                     mOnItemCheckedChangeListener.onItemCheckedChange(view, position, cookLists.get(position), isChecked);
                 }
             });
         }
+    }
 
+
+    public void clearList(){
+        if (deletedLists != null){
+            deletedLists.clear();
+        }
     }
 
     @Override

@@ -1,25 +1,25 @@
 package com.zhangjq.luckydraw.view;
 
-import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
-import android.view.inputmethod.InputMethodManager;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import com.zhangjq.luckydraw.MyApplication;
 import com.zhangjq.luckydraw.R;
 import com.zhangjq.luckydraw.adapter.CookiesRecyclerViewAdapter;
+import com.zhangjq.luckydraw.bean.CookiesInfo;
 import com.zhangjq.luckydraw.util.MConstant;
 
 import java.lang.reflect.Field;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.function.Consumer;
 
@@ -29,19 +29,29 @@ import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import static com.zhangjq.luckydraw.MyApplication.getCookiesLists;
 import static com.zhangjq.luckydraw.MyApplication.getMmkv;
+import static com.zhangjq.luckydraw.MyApplication.setCookiesLists;
+
+/**
+ * 创建日期：2022/7/26 9:54
+ *
+ * @author zhangjq
+ * @version 1.0
+ * 包名： com.zhangjq.luckydraw.view
+ * 类说明：
+ */
 
 public class CookiesBookActivity extends AppCompatActivity implements View.OnClickListener {
 
     private static final String TAG = "CookiesBookActivity";
 
     private CookiesRecyclerViewAdapter mCookiesRecyclerViewAdapter;
-    private LinkedList<String> cookLists;
-    private LinkedList<String> waitDeleteLists, deletedLists;
+    private LinkedList<CookiesInfo> cookLists;
+    private LinkedList<CookiesInfo> waitDeleteLists;
     private Button mDeleteBtn;
     private Button mAddBtn;
     private Button mCancleBtn;
-    private TextView mTitleTv;
     private RecyclerView mCookiesListRv;
     private Gson gson;
     private AlertDialog deleteDialog;
@@ -50,10 +60,10 @@ public class CookiesBookActivity extends AppCompatActivity implements View.OnCli
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_cookiesboot);
+        getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN);
         initView();
-        cookLists = getCookLists();
+        cookLists = getCookiesLists();
         waitDeleteLists = new LinkedList<>();
-        deletedLists = new LinkedList<>();
         mCookiesRecyclerViewAdapter = new CookiesRecyclerViewAdapter(this, cookLists);
         mCookiesListRv.setAdapter(mCookiesRecyclerViewAdapter);
         checkBoxListener();
@@ -66,7 +76,7 @@ public class CookiesBookActivity extends AppCompatActivity implements View.OnCli
         mAddBtn.setOnClickListener(this);
         mCancleBtn = (Button) findViewById(R.id.btn_cancle);
         mCancleBtn.setOnClickListener(this);
-        mTitleTv = (TextView) findViewById(R.id.tv_title);
+        TextView mTitleTv = (TextView) findViewById(R.id.tv_title);
         mCookiesListRv = (RecyclerView) findViewById(R.id.rv_cookies_list);
         mCookiesListRv.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
         mCookiesListRv.addItemDecoration(new DividerItemDecoration(this, DividerItemDecoration.VERTICAL));
@@ -75,39 +85,46 @@ public class CookiesBookActivity extends AppCompatActivity implements View.OnCli
     private void checkBoxListener() {
         mCookiesRecyclerViewAdapter.setOnItemCheckedChangeListener(new CookiesRecyclerViewAdapter.OnItemCheckedChangeListener() {
             @Override
-            public void onItemCheckedChange(View view, int position, String value, boolean isChecked) {
+            public void onItemCheckedChange(View view, int position, CookiesInfo cookiesInfo, boolean isChecked) {
                 if (isChecked) {
-                    Log.d(TAG, "选中了 " + cookLists.get(position));
-                    waitDeleteLists.add(value);
+                    Log.d(TAG, "选中了 " + cookiesInfo.getCookiesName()+"  索引："+cookLists.get(position).getCookiesName());
+                    waitDeleteLists.add(cookiesInfo);
                 } else {
-                    Log.d(TAG, "取消选中 " + cookLists.get(position));
-                    waitDeleteLists.remove(value);
+                    Log.d(TAG, "取消选中 " + cookiesInfo.getCookiesName()+"  索引："+cookLists.get(position).getCookiesName());
+                    waitDeleteLists.remove(cookiesInfo);
                 }
             }
         });
     }
 
-    private LinkedList<String> getCookLists() {
+    private LinkedList<CookiesInfo> getCookLists() {
         gson = new Gson();
-        LinkedList<String> lists = gson.fromJson(getMmkv().decodeString(MConstant.mmkv_key), new TypeToken<LinkedList<String>>() {
+        LinkedList<CookiesInfo> lists = gson.fromJson(getMmkv().decodeString(MConstant.mmkv_key), new TypeToken<LinkedList<CookiesInfo>>() {
         }.getType());
         if (lists != null) {
-            lists.forEach(new Consumer<String>() {
+            lists.forEach(new Consumer<CookiesInfo>() {
                 @Override
-                public void accept(String item) {
-                    Log.d(TAG, "菜名：" + item);
+                public void accept(CookiesInfo cookiesInfo) {
+                    Log.d(TAG, "菜名：" + cookiesInfo.getCookiesName());
                 }
             });
             return lists;
         }
-        lists = new LinkedList<String>();
-        lists.add("aaa");
-        lists.add("bbb");
-        lists.add("ccc");
-        lists.add("ddd");
-        lists.add("eee");
-        lists.add("fff");
-        lists.add("ggg");
+        lists = new LinkedList<>();
+        lists.add(new CookiesInfo("aaa"));
+        lists.add(new CookiesInfo("bbb"));
+        lists.add(new CookiesInfo("ccc"));
+        lists.add(new CookiesInfo("ddd"));
+        lists.add(new CookiesInfo("eee"));
+        lists.add(new CookiesInfo("fff"));
+        lists.add(new CookiesInfo("ggg"));
+        lists.add(new CookiesInfo("hhh"));
+        lists.add(new CookiesInfo("iii"));
+        lists.add(new CookiesInfo("jjj"));
+        lists.add(new CookiesInfo("kkk"));
+        lists.add(new CookiesInfo("lll"));
+        lists.add(new CookiesInfo("mmm"));
+        lists.add(new CookiesInfo("nnn"));
         return lists;
     }
 
@@ -138,7 +155,7 @@ public class CookiesBookActivity extends AppCompatActivity implements View.OnCli
                     setDialogIsShowing(addDialog, false);
                     Toast.makeText(CookiesBookActivity.this, "菜名不能为空", Toast.LENGTH_SHORT).show();
                 } else {
-                    cookLists.add(name);
+                    cookLists.add(new CookiesInfo(name));
                     mCookiesRecyclerViewAdapter.notifyDataSetChanged();
                     setDialogIsShowing(addDialog, true);
                     addDialog.dismiss();
@@ -155,9 +172,15 @@ public class CookiesBookActivity extends AppCompatActivity implements View.OnCli
     }
 
     @Override
+    protected void onPause() {
+        super.onPause();
+        setCookiesLists(cookLists);
+    }
+
+    @Override
     protected void onDestroy() {
         super.onDestroy();
-        getMmkv().encode(MConstant.mmkv_key, gson.toJson(cookLists));
+        mCookiesRecyclerViewAdapter.clearList();
     }
 
     private void deleteTipsDialog() {
@@ -168,11 +191,10 @@ public class CookiesBookActivity extends AppCompatActivity implements View.OnCli
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         if (waitDeleteLists != null && cookLists != null) {
-                            Collections.sort(waitDeleteLists, Collections.reverseOrder());
+//                            Collections.sort(waitDeleteLists, Collections.reverseOrder());
                             for (int i = 0; i < waitDeleteLists.size(); i++) {
-/*                                int index = waitDeleteLists.get(i);
-                                Log.d(TAG, "删除了(" + index + ")，即" + cookLists.get(index));*/
                                 cookLists.remove(waitDeleteLists.get(i));
+                                mCookiesRecyclerViewAdapter.clearList();
                             }
                             mCookiesRecyclerViewAdapter.notifyDataSetChanged();
                             waitDeleteLists.clear();
