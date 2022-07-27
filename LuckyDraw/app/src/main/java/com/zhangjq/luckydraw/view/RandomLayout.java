@@ -9,7 +9,6 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.zhangjq.luckydraw.R;
 
@@ -17,7 +16,6 @@ import java.util.ArrayList;
 import java.util.Random;
 
 import androidx.constraintlayout.widget.ConstraintLayout;
-import androidx.constraintlayout.widget.Constraints;
 
 /**
  * 创建日期：2022/7/21 10:25
@@ -49,21 +47,28 @@ public class RandomLayout<T> extends RelativeLayout {
     private boolean itemClickable = true;
     private boolean itemLongClickable = true;
     private ConstraintLayout container;
-    private TextView tv_tips;
-    private Button btn_start;
+    protected TextView tv_tips;
+    protected Button btn_start;
     private boolean ifStart = false;
+    private Random random;
 
     public RandomLayout(Context context) {
         super(context);
+        init(context);
     }
 
     public RandomLayout(Context context, AttributeSet attrs) {
         super(context, attrs);
+        init(context);
+    }
+
+    private void init(Context context) {
+        random = new Random();
         createStartView(context);
     }
 
     private void createStartView(Context context) {
-        container = (ConstraintLayout) LayoutInflater.from(context).inflate(R.layout.activity_main1, null, false);
+        container = (ConstraintLayout) LayoutInflater.from(context).inflate(R.layout.center_of_randomlayout, null, false);
         final Context mContext = context;
         RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
         layoutParams.addRule(CENTER_IN_PARENT);
@@ -74,17 +79,19 @@ public class RandomLayout<T> extends RelativeLayout {
         btn_start.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(mContext.getApplicationContext(), "调用布局的点击监听", Toast.LENGTH_SHORT).show();
+                Log.d(TAG, "调用布局的点击监听");
+                /*Toast.makeText(mContext.getApplicationContext(), "调用布局的点击监听", Toast.LENGTH_SHORT).show();
                 if (ifStart) {
                     btn_start.setText("停止");
                     ifStart = false;
                 } else {
                     btn_start.setText("开始");
                     ifStart = true;
-                }
+                }*/
             }
         });
         addView(container);
+//        addViewToRandomList(container);
     }
 
     /**
@@ -138,17 +145,17 @@ public class RandomLayout<T> extends RelativeLayout {
     }
 
     private boolean isCoverButton(final View view, int x, int y, final T t) {
-        int centerContainerX = (int)container.getX();
-        int centerContainerY = (int)container.getY();
+        int centerContainerX = (int) container.getX();
+        int centerContainerY = (int) container.getY();
         int centerContainerWidth = view.getMeasuredWidth();
         int centerContainerHeight = view.getMeasuredHeight();
         Rect centerContainerRect = new Rect(centerContainerX, centerContainerY, centerContainerWidth + x, centerContainerHeight + y);
         Rect newRect = new Rect(x, y, view.getMeasuredWidth() + x, view.getMeasuredHeight() + y);
         if (Rect.intersects(centerContainerRect, newRect)) {
-            if(view instanceof TextView){
-                TextView textView = (TextView)view;
-                Log.d(TAG, "过滤重复视图 "+textView.getText().toString());
-            }else{
+            if (view instanceof TextView) {
+                TextView textView = (TextView) view;
+                Log.d(TAG, "过滤重复视图 " + textView.getText().toString());
+            } else {
                 Log.d(TAG, "过滤重复视图,该视图不是TextView");
             }
             return true;
@@ -183,6 +190,10 @@ public class RandomLayout<T> extends RelativeLayout {
         });
     }
 
+    public int getListSize() {
+        return randomViewList.size();
+    }
+
     /**
      * 添加一个View到随机列表中，以此达到防止覆盖的效果!
      */
@@ -201,11 +212,36 @@ public class RandomLayout<T> extends RelativeLayout {
     }
 
     /**
-     * 从列表中移除一个随机视图!
+     * 从列表中移除一个指定的视图!
      */
-    public void removeRandomViewFromList(View view) {
+    public void removeSpecificViewFromList(View view) {
         randomViewList.remove(view);
         removeView(view);
+    }
+
+    public void showRandomResult(boolean isOver) {
+        int min = 0;
+        int max = randomViewList.size();
+        if (max > min) {
+            int removeIndex = random.nextInt(max) % (max - min + 1) + min;
+            TextView textView = (TextView) randomViewList.get(removeIndex);
+            tv_tips.setText(isOver ? "吃 " + textView.getText().toString() + " 吧" : textView.getText().toString());
+        }
+    }
+
+    /**
+     * 从列表中移除一个随机视图!
+     */
+    public void removeRandomViewFromList() {
+        int min = 0;
+        int max = randomViewList.size();
+        if (max > min) {
+            int removeIndex = random.nextInt(max) % (max - min + 1) + min;
+            View view = randomViewList.get(removeIndex);
+            removeView(view);
+            randomViewList.remove(view);
+
+        }
     }
 
     /**

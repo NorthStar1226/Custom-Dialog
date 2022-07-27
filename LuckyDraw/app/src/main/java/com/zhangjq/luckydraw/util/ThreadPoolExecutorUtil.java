@@ -28,4 +28,8 @@ public class ThreadPoolExecutorUtil {
         executor.execute(runnable);
     }
 
+    public static void stop(){
+        executor.shutdownNow();
+    }
+
 }

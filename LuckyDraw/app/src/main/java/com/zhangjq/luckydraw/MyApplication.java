@@ -5,6 +5,7 @@ import android.util.Log;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import com.squareup.leakcanary.LeakCanary;
 import com.tencent.mmkv.MMKV;
 import com.zhangjq.luckydraw.bean.CookiesInfo;
 import com.zhangjq.luckydraw.util.MConstant;
@@ -42,6 +43,7 @@ public class MyApplication extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
+        LeakCanary.install(this);
         myApp = this;
         String rootDir = MMKV.initialize(this);
         System.out.println("mmkv root: " + rootDir);
@@ -55,6 +57,12 @@ public class MyApplication extends Application {
 
     public static void setCookiesLists(LinkedList<CookiesInfo> cookiesLists) {
         MyApplication.cookiesLists = cookiesLists;
+        MyApplication.cookiesLists.forEach(new Consumer<CookiesInfo>() {
+            @Override
+            public void accept(CookiesInfo cookiesInfo) {
+                Log.d(TAG, "菜名：" + cookiesInfo.getCookiesName());
+            }
+        });
         getMmkv().encode(MConstant.mmkv_key, gson.toJson(cookiesLists));
     }
 
@@ -65,26 +73,23 @@ public class MyApplication extends Application {
             lists.forEach(new Consumer<CookiesInfo>() {
                 @Override
                 public void accept(CookiesInfo cookiesInfo) {
-                    Log.d(TAG, "菜名：" + cookiesInfo.getCookiesName());
+//                    Log.d(TAG, "菜名：" + cookiesInfo.getCookiesName());
                 }
             });
             return lists;
         }
         lists = new LinkedList<>();
-        lists.add(new CookiesInfo("aaa"));
-        lists.add(new CookiesInfo("bbb"));
-        lists.add(new CookiesInfo("ccc"));
-        lists.add(new CookiesInfo("ddd"));
-        lists.add(new CookiesInfo("eee"));
-        lists.add(new CookiesInfo("fff"));
-        lists.add(new CookiesInfo("ggg"));
-        lists.add(new CookiesInfo("hhh"));
-        lists.add(new CookiesInfo("iii"));
-        lists.add(new CookiesInfo("jjj"));
-        lists.add(new CookiesInfo("kkk"));
-        lists.add(new CookiesInfo("lll"));
-        lists.add(new CookiesInfo("mmm"));
-        lists.add(new CookiesInfo("nnn"));
+        lists.add(new CookiesInfo("馄饨"));
+        lists.add(new CookiesInfo("米线"));
+        lists.add(new CookiesInfo("酸辣粉"));
+        lists.add(new CookiesInfo("螺狮粉"));
+        lists.add(new CookiesInfo("麻辣烫"));
+        lists.add(new CookiesInfo("炒饭"));
+        lists.add(new CookiesInfo("卤肉饭"));
+        lists.add(new CookiesInfo("烤肉饭"));
+        lists.add(new CookiesInfo("黄焖鸡米饭"));
+        lists.add(new CookiesInfo("酸菜鱼"));
+        lists.add(new CookiesInfo("烤鸭"));
         return lists;
     }
 }
