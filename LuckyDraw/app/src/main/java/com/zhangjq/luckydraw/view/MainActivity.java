@@ -34,6 +34,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private RandomLayout mContainer;
     private Random random;
     private ViewHanler handler;
+    private boolean alive = true, running = false;
+    private boolean isStart = false;
+    private int randomCount = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -73,6 +76,18 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             }
             mContainer.addViewAtRandomXY(textView, "这个是textView" + i);
         }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        running = true;
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        running=false;
     }
 
     @Override
@@ -136,19 +151,20 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         return super.onOptionsItemSelected(item);
     }
 
-    private boolean alive = true, running = false;
 
     private void startThreadPool() {
         ThreadPoolExecutorUtil.exec(new Runnable() {
             @Override
             public void run() {
                 while (alive) {
-                    while (isStart) {
-                        handler.sendEmptyMessage(START_UPDATE_VIEW);
-                        try {
-                            Thread.sleep(300);
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
+                    while(running){
+                        while (isStart) {
+                            handler.sendEmptyMessage(START_UPDATE_VIEW);
+                            try {
+                                Thread.sleep(300);
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
+                            }
                         }
                     }
                 }
@@ -165,9 +181,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             }
         };*/
     }
-
-    private boolean isStart = false;
-    private int randomCount = 0;
 
     @Override
     public void onClick(View v) {
@@ -217,7 +230,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 activity.mContainer.showRandomResult(false);
                 if (activity.mContainer.getListSize() > 20) {
                     try {
-                        Thread.sleep(350);
+                        Thread.sleep(250);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
