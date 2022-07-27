@@ -123,6 +123,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         int id = item.getItemId();
         if (id == R.id.addMenu) {
+            if (isStart){
+                Toast.makeText(this, "请先点击停止按钮!", Toast.LENGTH_SHORT).show();
+                return false;
+            }
             Intent intent = new Intent(MainActivity.this, CookiesBookActivity.class);
             intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
             startActivity(intent);
@@ -150,6 +154,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 }
             }
         });
+/*        new Runnable() {
+            @Override
+            public void run() {
+                while (alive) {
+                    while (isStart) {
+                        Log.d(TAG, "循环");
+                    }
+                }
+            }
+        };*/
     }
 
     private boolean isStart = false;
@@ -159,9 +173,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.btn_start:
-                Toast.makeText(MainActivity.this, "调用MainActivity点击监听", Toast.LENGTH_SHORT).show();
                 if (isStart) {
-                    mContainer.btn_start.setText("开始");
+                    mContainer.btn_start.setText("不行，换一个");
                     isStart = false;
                     handler.sendEmptyMessage(STOP_UPDATE_VIEW);
                     randomCount++;
@@ -171,9 +184,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         randomCount=0;
                         return;
                     }
+                    mContainer.btn_start.setText("停止");
                     mContainer.removeAllRandomView();
                     loadSomeView();
-                    mContainer.btn_start.setText("停止");
                     isStart = true;
                 }
                 break;
